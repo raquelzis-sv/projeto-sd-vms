@@ -1,0 +1,9 @@
+---
+# FASE 5 — Camada de balanceamento: B1 e B2 (Nginx + Keepalived) e o VIP.
+#   cd /vagrant/ansible && ansible-playbook 03-balanceadores.yml
+
+- name: "Fase 5 - Camada de balanceamento (B1 e B2)"
+  hosts: balanceadores
+  become: true
+  roles:
+    - balanceadores

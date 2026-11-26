@@ -1,0 +1,20 @@
+# Variáveis do ambiente — altere aqui e rode "vagrant provision vm-controle".
+
+base_dir: /opt/sd
+
+# IP virtual compartilhado por B1 e B2
+vip: 192.168.56.100
+vip_prefixo: 24
+# Interface da rede host-only dentro das VMs (confira com "ip a" se der erro)
+vip_interface: eth1
+vrrp_router_id: 51
+vrrp_senha: sd2026
+
+# VM que hospeda os containers das aplicações
+apps_host: 192.168.56.20
+
+aplicacoes:
+  - { nome: APP01, id: app01, porta: 8081, cor: "#2563eb" }
+  - { nome: APP02, id: app02, porta: 8082, cor: "#16a34a" }
+  - { nome: APP03, id: app03, porta: 8083, cor: "#d97706" }
+  - { nome: APP04, id: app04, porta: 8084, cor: "#db2777" }

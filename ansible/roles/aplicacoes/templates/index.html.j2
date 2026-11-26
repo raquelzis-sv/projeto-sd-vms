@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- {{ ansible_managed }} -->
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ item.nome }} - Sistemas Distribuídos</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+           font-family: system-ui, sans-serif; background: {{ item.cor }}; color: #fff; }
+    .card { background: rgba(0,0,0,.25); padding: 2.5rem 3rem; border-radius: 16px; text-align: center; }
+    h1 { font-size: 4rem; margin: 0 0 .5rem; }
+    p { margin: .4rem 0; font-size: 1.1rem; }
+    code { background: rgba(0,0,0,.3); padding: .15rem .45rem; border-radius: 6px; }
+    small { opacity: .8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>{{ item.nome }}</h1>
+    <p>Container <code>{{ item.id }}</code> na vm-apps ({{ apps_host }}:{{ item.porta }})</p>
+    <p>Balanceador usado: <code><!--# echo var="http_x_balancer_used" default="nenhum (acesso direto)" --></code></p>
+    <p><small>Recarregue (F5) para ver o Round-Robin: APP01 → APP02 → APP03 → APP04</small></p>
+  </div>
+</body>
+</html>

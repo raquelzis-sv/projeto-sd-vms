@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+# Servidor das aplicações: página estática.
+# SSI ligado só para a página exibir o header X-Balancer-Used injetado pelo balanceador.
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    ssi on;
+    ssi_silent_errors on;
+
+    location / {
+        index index.html;
+        add_header X-App-Server $hostname always;
+        add_header Cache-Control "no-store" always;
+    }
+
+    location = /health {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+}

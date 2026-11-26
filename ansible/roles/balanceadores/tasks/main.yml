@@ -1,0 +1,46 @@
+---
+- name: Criar diretório do balanceador
+  ansible.builtin.file:
+    path: "{{ base_dir }}/balanceador"
+    state: directory
+    mode: "0755"
+
+- name: Copiar arquivos da imagem (Dockerfile, entrypoint, health check)
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ base_dir }}/balanceador/{{ item }}"
+    mode: "0755"
+  loop: [Dockerfile, entrypoint.sh, check_nginx.sh]
+
+- name: Gerar nginx.conf (Round-Robin + header X-Balancer-Used)
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "{{ base_dir }}/balanceador/nginx.conf"
+    mode: "0644"
+
+- name: Gerar keepalived.conf ({{ lb_estado }}, prioridade {{ lb_prioridade }})
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: "{{ base_dir }}/balanceador/keepalived.conf"
+    mode: "0644"
+
+- name: Gerar o docker-compose do balanceador
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ base_dir }}/balanceador/docker-compose.yml"
+    mode: "0644"
+
+- name: Construir a imagem e subir o container {{ lb_nome }}
+  ansible.builtin.command:
+    cmd: docker compose up -d --build --force-recreate --remove-orphans
+    chdir: "{{ base_dir }}/balanceador"
+  changed_when: true
+
+- name: Conferir se o Nginx do {{ lb_nome }} responde
+  ansible.builtin.uri:
+    url: http://127.0.0.1/health
+    return_content: true
+  register: resp
+  until: resp.status == 200
+  retries: 15
+  delay: 1

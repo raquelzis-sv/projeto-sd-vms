@@ -1,0 +1,9 @@
+---
+# FASE 3 — Instala Docker Engine + Docker Compose nas VMs do cenário.
+#   cd /vagrant/ansible && ansible-playbook 01-docker.yml
+
+- name: "Fase 3 - Docker nas VMs (vm-b1, vm-b2, vm-apps)"
+  hosts: balanceadores:aplicacoes
+  become: true
+  roles:
+    - docker

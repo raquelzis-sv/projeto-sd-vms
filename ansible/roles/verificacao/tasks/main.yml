@@ -1,0 +1,24 @@
+---
+- name: Aguardar o VIP {{ vip }} responder (eleição VRRP)
+  ansible.builtin.uri:
+    url: "http://{{ vip }}/health"
+    return_content: true
+  register: vip_check
+  until: vip_check.status == 200
+  retries: 20
+  delay: 1
+
+- name: Fazer 4 requisições ao VIP para conferir o Round-Robin
+  ansible.builtin.command: >-
+    curl -s -o /dev/null -D - http://{{ vip }}/
+  register: reqs
+  loop: [1, 2, 3, 4]
+  changed_when: false
+
+- name: Ambiente pronto
+  ansible.builtin.debug:
+    msg:
+      - "VIP {{ vip }} respondendo — dono atual: {{ vip_check.content | trim }}"
+      - "Aplicações atendidas: {{ reqs.results | map(attribute='stdout') | map('regex_search', 'X-App-Server: \\S+') | list }}"
+      - "Navegador do seu computador: http://{{ vip }}"
+      - "Testes: vagrant ssh vm-controle  ->  roundrobin | failover | continuo"

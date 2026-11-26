@@ -1,0 +1,9 @@
+---
+# FASE 4 — Camada de aplicação: containers APP01..APP04 na vm-apps.
+#   cd /vagrant/ansible && ansible-playbook 02-aplicacoes.yml
+
+- name: "Fase 4 - Camada de aplicação (APP01, APP02, APP03, APP04)"
+  hosts: aplicacoes
+  become: true
+  roles:
+    - aplicacoes

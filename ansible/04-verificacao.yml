@@ -1,0 +1,9 @@
+---
+# FASE 6 — Verificação: VIP respondendo e Round-Robin pelas 4 aplicações.
+#   cd /vagrant/ansible && ansible-playbook 04-verificacao.yml
+
+- name: "Fase 6 - Verificar o cenário a partir da vm-controle"
+  hosts: controle
+  gather_facts: false
+  roles:
+    - verificacao

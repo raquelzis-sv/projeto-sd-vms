@@ -1,0 +1,23 @@
+---
+- name: Instalar dependências
+  ansible.builtin.apt:
+    name: [curl, ca-certificates]
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Instalar Docker Engine + plugin Compose (script oficial)
+  ansible.builtin.shell: curl -fsSL https://get.docker.com | sh
+  args:
+    creates: /usr/bin/docker
+
+- name: Garantir o serviço Docker ativo
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Permitir que o usuário vagrant use o Docker sem sudo
+  ansible.builtin.user:
+    name: vagrant
+    groups: docker
+    append: true

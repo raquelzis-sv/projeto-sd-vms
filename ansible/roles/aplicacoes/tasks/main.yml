@@ -1,0 +1,47 @@
+---
+- name: Criar diretórios das aplicações
+  ansible.builtin.file:
+    path: "{{ base_dir }}/apps/{{ item.id }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ aplicacoes }}"
+  loop_control:
+    label: "{{ item.nome }}"
+
+- name: Gerar a página estática de cada aplicação
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ base_dir }}/apps/{{ item.id }}/index.html"
+    mode: "0644"
+  loop: "{{ aplicacoes }}"
+  loop_control:
+    label: "{{ item.nome }}"
+
+- name: Gerar a configuração do Nginx das aplicações
+  ansible.builtin.template:
+    src: app.conf.j2
+    dest: "{{ base_dir }}/apps/app.conf"
+    mode: "0644"
+
+- name: Gerar o docker-compose das aplicações
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ base_dir }}/apps/docker-compose.yml"
+    mode: "0644"
+
+- name: Subir os containers APP01..APP04
+  ansible.builtin.command:
+    cmd: docker compose up -d --force-recreate --remove-orphans
+    chdir: "{{ base_dir }}/apps"
+  changed_when: true
+
+- name: Conferir se cada aplicação responde
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ item.porta }}/health"
+  register: resp
+  until: resp.status == 200
+  retries: 10
+  delay: 1
+  loop: "{{ aplicacoes }}"
+  loop_control:
+    label: "{{ item.nome }} :{{ item.porta }}"

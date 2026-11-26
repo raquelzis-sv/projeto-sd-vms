@@ -1,0 +1,45 @@
+# {{ ansible_managed }}
+# Keepalived do {{ lb_nome }} — estado inicial {{ lb_estado }}, prioridade {{ lb_prioridade }}
+
+global_defs {
+    router_id {{ lb_nome }}
+    script_user root
+    enable_script_security
+}
+
+# Health check: se o Nginx parar, este nó entrega o VIP
+vrrp_script chk_nginx {
+    script "/usr/local/bin/check_nginx.sh"
+    interval 1
+    fall 2
+    rise 2
+}
+
+vrrp_instance VI_SD {
+    state {{ lb_estado }}
+    interface {{ vip_interface }}
+    virtual_router_id {{ vrrp_router_id }}
+    priority {{ lb_prioridade }}
+    advert_int 1
+
+    # Unicast entre B1 e B2 (mais confiável que multicast na rede do VirtualBox)
+    unicast_src_ip {{ ansible_host }}
+    unicast_peer {
+{% for outro in groups['balanceadores'] if outro != inventory_hostname %}
+        {{ hostvars[outro].ansible_host }}
+{% endfor %}
+    }
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ vrrp_senha }}
+    }
+
+    virtual_ipaddress {
+        {{ vip }}/{{ vip_prefixo }} dev {{ vip_interface }}
+    }
+
+    track_script {
+        chk_nginx
+    }
+}
